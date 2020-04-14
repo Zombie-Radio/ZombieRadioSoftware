@@ -49,12 +49,19 @@ void setup() {
   Serial.println("LoRa Radio Starting...");
 
   LoRa.setPins(csPin, resetPin, irqPin);
-  
-  if (!LoRa.begin(433E6)) {
-    Serial.println("Starting LoRa Radio failed (sad face)!");
-    while (1);
-  }
 
+
+  
+  //while (!LoRa.begin(433E6)) {
+  while (!LoRa.begin(433175E3)) {
+    Serial.println("Starting LoRa Radio failed (sad face)!");
+    delay(1000);
+  }
+  
+  LoRa.setSignalBandwidth(250E3);
+
+  //LoRa.setTxPower(30);
+  
   Serial.println("Lora Radio Started!");
   Serial.print("Current Battery Voltage:");
   Serial.print(get_battery_voltage());
