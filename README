@@ -23,9 +23,9 @@ EI9HBB: ping EIZRSL
 Sender  CMD  Target  
 
 
-+-------+
-| RELAY | 
-+-------+
++--------+
+| REPEAT | 
++--------+
   
 EI9HBB: repeat Hello World[04]  
   ^       ^      ^         ^
