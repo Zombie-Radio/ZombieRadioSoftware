@@ -5,7 +5,7 @@
  * Test for the lead-acid LORA thing
  */
 
-#define MYID "EI9HBB"
+#define MYID "EI8HUB"
  
 const long frequency = 433E6;  // LoRa Frequency
 
@@ -18,22 +18,26 @@ int counter = 0;
 void generate_crc(char *msg, char *readablecrcvalue);
 uint8_t gencrc(char *data, size_t len);
 
+char msg[255];
+char msgcrc[5]; // [XX]\0
+unsigned long lasttime = 0;
 
 void setup() {
-  char msg[255];
-  char msgcrc[5]; // [XX]\0
-  
   Serial.begin(9600);
   while (!Serial);
 
   Serial.println("LoRa Starting...");
 
   LoRa.setPins(csPin, resetPin, irqPin);
-  
-  if (!LoRa.begin(433E6)) {
-    Serial.println("Starting LoRa failed!");
-    while (1);
+
+  while (!LoRa.begin(433175E3)) {
+    Serial.println("Starting LoRa Radio failed (sad face)!");
+    delay(1000);
   }
+
+  LoRa.setSignalBandwidth(250E3);
+
+  LoRa.setTxPower(20);
 
   Serial.println("Lora Started!");
 
@@ -51,12 +55,11 @@ void setup() {
 
 
   // Ping a repeater message
-  //sprintf(msg, "%s: ping EIZRSL", MYID);
-
+  sprintf(msg, "%s: ping EIZRSL", MYID);
 
 
   // Example of a message that hasn't been repeated yet...
-  sprintf(msg, "%s: repeat Hello World", MYID);
+  //sprintf(msg, "%s: repeat Hello World", MYID);
 
  
   // Example of a message that's been repeated via 3 repeaters...
@@ -65,12 +68,14 @@ void setup() {
 
   // Repeating requires a CRC (e.g. [0d]) add to the end of the message
   // We use this to be sure the message isn't corrupted over-the-air
+
+  
   generate_crc(msg, msgcrc);
   strcat(msg, msgcrc);
+  sendping();
+}
 
-
-  // BAD CRC MESSAGE
-  //sprintf(msg, "%s: repeat Hello World[00]", MYID);
+void sendping() {
   Serial.print("Sending: ");
   Serial.println(msg);
   
@@ -78,10 +83,8 @@ void setup() {
   LoRa.print(msg);
   LoRa.endPacket();
   Serial.println("Done.");
+  }
 
-
-  
-}
 void generate_crc(char *msg, char *readablecrcvalue) {
   uint8_t crc;
  
@@ -120,7 +123,12 @@ void loop() {
     // print RSSI of packet
     Serial.print("' with RSSI ");
     Serial.println(LoRa.packetRssi());
-  } 
+  }
+  unsigned long currenttime = millis();
+  if(currenttime-lasttime >= 60000) {
+    sendping();
+    lasttime = currenttime;
+    }
   /** 
   if (counter%10 == 0) {
     Serial.print("Counter is ");
