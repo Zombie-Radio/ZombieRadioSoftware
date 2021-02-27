@@ -6,7 +6,9 @@
 // This is our Repeater ID
 // Is must be unique
 //
-#define MYID "EIZRSL"
+#define MYID_OLD "EIZRSL"
+
+#define MYID "EIZRWG"
 
 #define CMD_UNKNOWN 0
 #define CMD_PING 1
@@ -20,8 +22,6 @@ const int resetPin = A4;        // LoRa radio reset
 const int irqPin = 2;          // change for your board; must be a hardware interrupt pin
 
 int counter = 0;
-
-
 
 typedef struct {
   char sender[7];
@@ -49,8 +49,6 @@ void setup() {
   Serial.println("LoRa Radio Starting...");
 
   LoRa.setPins(csPin, resetPin, irqPin);
-
-
   
   //while (!LoRa.begin(433E6)) {
   while (!LoRa.begin(433175E3)) {
@@ -224,15 +222,15 @@ void handle_repeat(Cmd *cmd) {
 
   if (!cmd->iscrc) {
     // No CRC - Refusing to REPEAT
-    sprintf(retstr, "%s: relay error! No CRC in receivd message (CRC is mandatory for repeat command). Replying to %s.", MYID, cmd->sender);    
+    sprintf(retstr, "%s: repeat error! No CRC in receivd message (CRC is mandatory for repeat command). Replying to %s.", MYID, cmd->sender);    
   }
   else {
     if (!cmd->crcgood) {
       // Invalid CRC - Refusing to REPEAT
-      sprintf(retstr, "%s: relay error! Invalid CRC in receivd message (maybe message is corrupt?). RECV CRC: %s. Replying to %s.", MYID, cmd->crc, cmd->sender);
+      sprintf(retstr, "%s: repeat error! Invalid CRC in receivd message (maybe message is corrupt?). RECV CRC: %s. Replying to %s.", MYID, cmd->crc, cmd->sender);
     }
     else {
-      // Am I already in the relay list ?
+      // Am I already in the repeat list ?
       sprintf(myid_search_pattern, "~%s", MYID);
       if (strstr(cmd->payload, myid_search_pattern)) {
          // We are already in the list - DONT repeat
