@@ -7,7 +7,7 @@
 
 #define MYID "EI8HUB"
  
-const long frequency = 433E6;  // LoRa Frequency
+const long frequency = 433E6;  // LoRa  q
 
 const int csPin = 10;          // LoRa radio chip select
 const int resetPin = 5;        // LoRa radio reset
@@ -31,13 +31,16 @@ void setup() {
   LoRa.setPins(csPin, resetPin, irqPin);
 
   while (!LoRa.begin(433175E3)) {
+  //while (!LoRa.begin(433E6)) {
     Serial.println("Starting LoRa Radio failed (sad face)!");
     delay(1000);
   }
 
   LoRa.setSignalBandwidth(250E3);
 
-  LoRa.setTxPower(20);
+  //LoRa.disableCrc();
+  
+  //0000000000000000000000000000000000000000000000000000000000000000LoRa.setTxPower(20);
 
   Serial.println("Lora Started!");
 
@@ -125,7 +128,7 @@ void loop() {
     Serial.println(LoRa.packetRssi());
   }
   unsigned long currenttime = millis();
-  if(currenttime-lasttime >= 60000) {
+  if(currenttime-lasttime >= 3000) {
     sendping();
     lasttime = currenttime;
     }
